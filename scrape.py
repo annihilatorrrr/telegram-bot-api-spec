@@ -27,7 +27,7 @@ def retrieve_api_info() -> Dict:
     }
 
     for x in list(dev_rules.children):
-        if x.name == "h3" or x.name == "hr":
+        if x.name in ["h3", "hr"]:
             # New category; clear name and type.
             curr_name = ""
             curr_type = ""
@@ -126,10 +126,7 @@ def get_method_return_type(curr_name, curr_type, description, items):
 
 
 def get_type_and_name(x, anchor, items):
-    if x.text[0].isupper():
-        curr_type = TYPES
-    else:
-        curr_type = METHODS
+    curr_type = TYPES if x.text[0].isupper() else METHODS
     curr_name = x.get_text()
     items[curr_type][curr_name] = {"name": curr_name}
 
@@ -145,7 +142,6 @@ def extract_return_type(curr_type: str, curr_name: str, ret_str: str, items: Dic
     if array_match:
         ret = clean_tg_type(array_match.group(1))
         rets = [f"Array of {r}" for r in ret]
-        items[curr_type][curr_name]["returns"] = rets
     else:
         words = ret_str.split()
         rets = [
@@ -153,7 +149,8 @@ def extract_return_type(curr_type: str, curr_name: str, ret_str: str, items: Dic
             for r in clean_tg_type(ret.translate(str.maketrans("", "", string.punctuation)))
             if ret[0].isupper()
         ]
-        items[curr_type][curr_name]["returns"] = rets
+
+    items[curr_type][curr_name]["returns"] = rets
 
 
 def clean_tg_description(t: Tag) -> str:
@@ -211,7 +208,7 @@ def get_proper_type(t: str) -> str:
     elif t == "Int":
         return "Integer"
 
-    elif t == "True" or t == "Bool":
+    elif t in {"True", "Bool"}:
         return "Boolean"
 
     return t
